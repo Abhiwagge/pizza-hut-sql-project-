@@ -1,0 +1,117 @@
+-- Total quantity ordered by pizza category
+
+SELECT 
+    pizza_types.category,
+    SUM(order_details.quantity) AS total_quantity
+FROM pizza_types
+JOIN pizzas 
+    ON pizza_types.pizza_type_id = pizzas.pizza_type_id
+JOIN order_details 
+    ON order_details.pizza_id = pizzas.pizza_id
+GROUP BY pizza_types.category
+ORDER BY total_quantity DESC;
+
+-- Distribution of orders by hour of the day
+
+SELECT 
+    HOUR(orders.time) AS order_hour,
+    COUNT(order_id) AS total_orders
+FROM orders
+GROUP BY HOUR(orders.time)
+ORDER BY total_orders DESC;
+
+
+-- Category-wise distribution of pizzas
+
+SELECT 
+    pizza_types.category,
+    COUNT(pizza_types.name) AS total_pizzas
+FROM pizza_types
+GROUP BY pizza_types.category;
+
+
+-- Average number of pizzas ordered per day
+
+SELECT 
+    ROUND(AVG(daily_quantity), 0) AS avg_pizzas_per_day
+FROM (
+    SELECT 
+        orders.date,
+        SUM(order_details.quantity) AS daily_quantity
+    FROM orders
+    JOIN order_details 
+        ON orders.order_id = order_details.order_id
+    GROUP BY orders.date
+) AS daily_orders;
+
+
+-- Top 3 pizzas based on revenue
+
+SELECT 
+    pizza_types.name,
+    SUM(order_details.quantity * pizzas.price) AS revenue
+FROM pizza_types
+JOIN pizzas 
+    ON pizzas.pizza_type_id = pizza_types.pizza_type_id
+JOIN order_details 
+    ON order_details.pizza_id = pizzas.pizza_id
+GROUP BY pizza_types.name
+ORDER BY revenue DESC
+LIMIT 3;
+
+-- Revenue by pizza category
+
+SELECT 
+    pizza_types.category,
+    SUM(order_details.quantity * pizzas.price) AS revenue
+FROM pizza_types
+JOIN pizzas 
+    ON pizza_types.pizza_type_id = pizzas.pizza_type_id
+JOIN order_details 
+    ON order_details.pizza_id = pizzas.pizza_id
+GROUP BY pizza_types.category
+ORDER BY revenue DESC;
+
+
+-- Daily revenue trend
+
+SELECT 
+    orders.date,
+    SUM(order_details.quantity * pizzas.price) AS revenue
+FROM order_details
+JOIN pizzas 
+    ON order_details.pizza_id = pizzas.pizza_id
+JOIN orders 
+    ON orders.order_id = order_details.order_id
+GROUP BY orders.date
+ORDER BY orders.date;
+
+
+-- Cumulative revenue over time
+
+SELECT 
+    orders.date,
+    SUM(order_details.quantity * pizzas.price) AS daily_revenue
+FROM order_details
+JOIN pizzas 
+    ON order_details.pizza_id = pizzas.pizza_id
+JOIN orders 
+    ON orders.order_id = order_details.order_id
+GROUP BY orders.date;
+
+
+-- Top pizzas within each category by revenue
+
+SELECT 
+    pizza_types.category,
+    pizza_types.name,
+    SUM(order_details.quantity * pizzas.price) AS revenue
+FROM pizza_types
+JOIN pizzas 
+    ON pizza_types.pizza_type_id = pizzas.pizza_type_id
+JOIN order_details 
+    ON order_details.pizza_id = pizzas.pizza_id
+GROUP BY pizza_types.category, pizza_types.name
+ORDER BY revenue DESC;
+
+
